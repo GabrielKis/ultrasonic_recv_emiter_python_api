@@ -1,4 +1,5 @@
 import argparse
+import bluetooth
 
 def send_data_to_esp():
     parser = argparse.ArgumentParser()
@@ -12,6 +13,11 @@ def send_data_to_esp():
     if args.ping:
         #TODO: TESTE DE CONEXAO BLUETOOTH
         print('testar conexao com esp32')
+        devices = bluetooth.discover_devices(lookup_names=True)
+        print("Devices found: %s" % len(devices))
+        for item in devices:
+            print(item)
+
     elif args.csv_file:
         csv_data_string = ''
         with open(args.csv_file, 'r') as csv_input:
