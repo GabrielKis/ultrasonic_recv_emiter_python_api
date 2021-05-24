@@ -4,7 +4,8 @@ import time
 
 from queue import Queue
 
-mqttBroker ="mqtt.eclipseprojects.io" 
+#mqttBroker ="mqtt.eclipseprojects.io" 
+mqttBroker ="localhost" 
 client_name = "Client_PC"
 
 topics_pub_list = [('QTD', 2), ('Waveform', 2)]
@@ -46,7 +47,7 @@ def receive_data(client_obj):
 if __name__ == "__main__":
     q = Queue()
     client_pc = mqtt.Client("Client_PC", transport="websockets")
-    client_pc.connect(mqttBroker, port=80)
+    client_pc.connect(mqttBroker, port=9001)
     #parse input
     #send cmd-waveform
     send_data(client_pc)

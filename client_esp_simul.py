@@ -5,7 +5,8 @@ import time
 
 from queue import Queue
 
-mqttBroker ="mqtt.eclipseprojects.io" 
+#mqttBroker ="mqtt.eclipseprojects.io" 
+mqttBroker ="localhost" 
 
 client_name = 'Client_ESP_Simul'
 topics_list = [('QTD', 2), ('Waveform', 2)]
@@ -14,6 +15,7 @@ def on_message(client, userdata, message):
     q.put(message)
     print("{} RECEIVED {} from topic {}".format(client_name, str(message.topic), \
                                             str(message.payload.decode("utf-8"))))
+
 def send_data(client_obj):
     client_obj.publish("Ultrasound_send", 'PAYLOAD1')
     print("{} PUBLISH {} to Ultrasound_send".format(str(client_name), 'PAYLOAD1'))
@@ -43,8 +45,9 @@ def receive_data(client_obj):
 if __name__ == "__main__":
     q = Queue()
     receive_data_ctrl_queue = Queue()
+#   client_esp = mqtt.Client("Temperature_Inside_Getter")
     client_esp = mqtt.Client("Temperature_Inside_Getter", transport="websockets")
-    client_esp.connect(mqttBroker, port=80)
+    client_esp.connect(mqttBroker, port=9001)
     #parse input
     #receive-waveforms
     receive_data(client_esp)
