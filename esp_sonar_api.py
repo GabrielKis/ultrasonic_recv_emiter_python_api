@@ -1,3 +1,6 @@
+import sys
+import subprocess
+
 import argparse
 from client_pc_mqtt import EspMqttComm
 
@@ -35,11 +38,12 @@ def send_data_to_esp():
     args = parser.parse_args()
 
     # iniciar broker
+    broker_process = subprocess.Popen(['mosquitto', '-c', 'mosquitto.conf'],\
+                                        stderr=subprocess.STDOUT)
 
     if args.waveform == 'sine':
         # gerar look-up table do seno
         print('gerar onda senoidal')
-        payload = bytes([int(args.repeat_period)]) + bytes(SINE_LOOK_UP_TABLE)
     elif args.waveform == 'triangular':
         # gerar look-up table do triangular - com duty
         print('gerar onda triangular')
@@ -47,17 +51,13 @@ def send_data_to_esp():
         # gerar look-up table da quadrada - com duty
         print('gerar onda quadrada')
 
-    # montar e enviar payload para broker
-
-    print(payload)
-
-    print(len(payload))
     sonar_client_pc = EspMqttComm(client_name)
     sonar_client_pc.connect()
     sonar_client_pc.send_command_to_esp(args.repeat_period, SINE_LOOK_UP_TABLE)
     sonar_client_pc.disconnect()
 
     # terminar broker - como? matando subprocess do python, ou matando o processo diretamente do linux
+    broker_process.kill()
 
 if __name__ == "__main__":
     send_data_to_esp()
