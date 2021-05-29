@@ -4,26 +4,29 @@ import time
 
 from queue import Queue
 
-#mqttBroker ="mqtt.eclipseprojects.io" 
-mqttBroker ="localhost" 
+#mqttBroker ="mqtt.eclipseprojects.io"
+mqttBroker ="192.168.4.2" 
 client_name = "Client_PC"
 
 topics_pub_list = [('QTD', 2), ('Waveform', 2)]
-topics_sub_list = [('Ultrasound_send', 2), ('Ultrasound_recv', 2)]
+topics_sub_list = [('ultrasound_send', 2), ('ultrasound_recv', 2)]
+
+qtd_payload = '0005' + ('ff' * 125)
 
 def on_message(client, userdata, message):
     q.put(message)
-    print("{} RECEIVED {} from topic {}".format(client_name, str(message.topic), \
-                                            str(message.payload.decode("utf-8"))))
+    print("{} RECEIVED {} from topic: {}".format(client_name, str(message.topic), \
+                                            message.payload))
+    print(len(message.payload))
 
 def send_data(client_obj):
     #client_pc = mqtt.Client(client_name, transport="tcp")
 
     #randNumber = uniform(20.0, 21.0)
-    client_obj.publish("QTD", 5)
-    print("{} PUBLISH {} to QTD".format(str(client_name), 5))
-    client_obj.publish("Waveform", 'SINE')
-    print("{} PUBLISH {} to Waveform".format(str(client_name), 'Sine'))
+    client_obj.publish("QTD", qtd_payload)
+    print("{} PUBLISH {} to QTD".format(str(client_name), qtd_payload))
+    #client_obj.publish("Waveform", 'SINE')
+    #print("{} PUBLISH {} to Waveform".format(str(client_name), 'Sine'))
 
 def receive_data(client_obj):
     receive_data_ctrl = [False, False]
@@ -47,7 +50,8 @@ def receive_data(client_obj):
 if __name__ == "__main__":
     q = Queue()
     client_pc = mqtt.Client("Client_PC", transport="websockets")
-    client_pc.connect(mqttBroker, port=9001)
+    #client_pc = mqtt.Client("Client_PC")
+    client_pc.connect(mqttBroker, port=5089)
     #parse input
     #send cmd-waveform
     send_data(client_pc)
