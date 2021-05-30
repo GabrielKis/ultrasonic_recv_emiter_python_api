@@ -1,5 +1,7 @@
 import sys
 import subprocess
+import numpy as np
+from scipy import signal as sg
 
 import argparse
 from client_pc_mqtt import EspMqttComm
@@ -23,6 +25,8 @@ SINE_LOOK_UP_TABLE = [
     0x60,0x66,0x6c,0x73,0x79,0x80
 ]
 
+SAMPLES_PER_PERIOD = 125
+MULTIPLIER = 127.5
 client_name = 'Client_PC'
 
 def send_data_to_esp():
@@ -33,27 +37,35 @@ def send_data_to_esp():
                         help="Amount of times that the period will be repeated")
     parser.add_argument("--waveform", required=False, default='sine',
                         help="Waveform of signal to be sent (sine, triangular and square)")
-    #parser.add_argument("-p", "--ping", action='store_true',
-    #                    help="Test bluetooth connection to esp32")
+    parser.add_argument("--duty", required=False, default='0.5',
+                        help="Amount of times that the period will be repeated")
     args = parser.parse_args()
 
     # iniciar broker
     broker_process = subprocess.Popen(['mosquitto', '-c', 'mosquitto.conf'],\
                                         stderr=subprocess.STDOUT)
 
+    x = np.arange(0,SAMPLES_PER_PERIOD)
+    duty_cicle = float(args.duty)
     if args.waveform == 'sine':
         # gerar look-up table do seno
-        print('gerar onda senoidal')
+        signal_np = (MULTIPLIER * np.sin(2*np.pi*x/SAMPLES_PER_PERIOD)) + MULTIPLIER
+        signal_list = signal_np.tolist()
+        signal = [round(signal_list) for signal_list in signal_list]
     elif args.waveform == 'triangular':
         # gerar look-up table do triangular - com duty
-        print('gerar onda triangular')
-    elif args.waveform == 'square':
+        signal_np = (MULTIPLIER * sg.sawtooth(2*np.pi*x/SAMPLES_PER_PERIOD, width=duty_cicle)) + MULTIPLIER
+        signal_list = signal_np.tolist()
+        signal = [round(signal_list) for signal_list in signal_list]
+    elif args.waveform == 'quadrada':
         # gerar look-up table da quadrada - com duty
-        print('gerar onda quadrada')
+        signal_np = (MULTIPLIER * sg.square(2*np.pi*x/SAMPLES_PER_PERIOD, duty=duty_cicle)) + MULTIPLIER
+        signal_list = signal_np.tolist()
+        signal = [round(signal_list) for signal_list in signal_list]
 
     sonar_client_pc = EspMqttComm(client_name)
     sonar_client_pc.connect()
-    sonar_client_pc.send_command_to_esp(args.repeat_period, SINE_LOOK_UP_TABLE)
+    sonar_client_pc.send_command_to_esp(args.repeat_period, signal)
     sonar_client_pc.disconnect()
 
     # terminar broker - como? matando subprocess do python, ou matando o processo diretamente do linux
