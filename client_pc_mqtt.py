@@ -39,7 +39,7 @@ class EspMqttComm():
 
     def _send_data(self, payload):
         self.client_pc.publish(topics_pub_list[0][0], payload, retain=True)
-        print("{} PUBLISHED data to topic:{}".format(str(client_name), topics_pub_list[0][0]))
+        print("{} PUBLISHED data to topic: {}".format(str(client_name), topics_pub_list[0][0]))
 
     def _receive_data(self):
         receive_data_ctrl = [False, False]
