@@ -13,11 +13,11 @@ client_name = 'Client_PC'
 def send_data_to_esp():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--repeat_period", required=False, default='10',
-                        help="Amount of times that the period will be repeated")
+                        help="Amount of times that the period will be repeated [0-65535]")
     parser.add_argument("--waveform", required=False, default='sine',
-                        help="Waveform of signal to be sent (sine, triangular and square)")
+                        help="Waveform of signal to be sent [sine, triangular and square]")
     parser.add_argument("--duty", required=False, default='0.5',
-                        help="Duty cicle of signal (0-1)")
+                        help="Duty cicle of signal [0-1]")
     args = parser.parse_args()
 
     # begin broker broker
