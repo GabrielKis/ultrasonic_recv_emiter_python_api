@@ -4,6 +4,7 @@ import time
 
 from queue import Queue
 
+# Configured on the ESP firmware
 mqttBroker ="192.168.4.2" 
 client_name = "Client_PC"
 
@@ -25,7 +26,7 @@ class EspMqttComm():
 
     def send_command_to_esp(self, qtd_periods, waveform_data):
         #parse input
-        payload = bytes([int(qtd_periods)]) + bytes(waveform_data)
+        payload = (int(qtd_periods)).to_bytes(2, byteorder='big') + bytes(waveform_data)
         #send cmd-waveform
         self._send_data(payload)
         #receive-waveforms
@@ -34,13 +35,11 @@ class EspMqttComm():
 
     def _on_message(self, client, userdata, message):
         self.q.put(message)
-        print("{} RECEIVED {} from topic: {}".format(client_name, str(message.topic), \
-                                                message.payload))
-        print(len(message.payload))
+        print("{} RECEIVED data from topic: {}".format(client_name, str(message.topic)))
 
     def _send_data(self, payload):
         self.client_pc.publish(topics_pub_list[0][0], payload, retain=True)
-        print("{} PUBLISH {} to {}".format(str(client_name), payload, topics_pub_list[0][0]))
+        print("{} PUBLISHED data to topic:{}".format(str(client_name), topics_pub_list[0][0]))
 
     def _receive_data(self):
         receive_data_ctrl = [False, False]
