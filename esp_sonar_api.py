@@ -24,25 +24,28 @@ def send_data_to_esp():
     broker_process = subprocess.Popen(['mosquitto', '-c', 'mosquitto.conf'],\
                                         stderr=subprocess.STDOUT)
 
-    x = np.arange(0,SAMPLES_PER_PERIOD)
-    duty_cicle = float(args.duty)
-    if args.waveform == 'sine':
-        signal_np = (MULTIPLIER * np.sin(2*np.pi*x/SAMPLES_PER_PERIOD)) + MULTIPLIER
-        signal_list = signal_np.tolist()
-        signal = [round(signal_list) for signal_list in signal_list]
-    elif args.waveform == 'triangular':
-        signal_np = (MULTIPLIER * sg.sawtooth(2*np.pi*x/SAMPLES_PER_PERIOD, width=duty_cicle)) + MULTIPLIER
-        signal_list = signal_np.tolist()
-        signal = [round(signal_list) for signal_list in signal_list]
-    elif args.waveform == 'square':
-        signal_np = (MULTIPLIER * sg.square(2*np.pi*x/SAMPLES_PER_PERIOD, duty=duty_cicle)) + MULTIPLIER
-        signal_list = signal_np.tolist()
-        signal = [round(signal_list) for signal_list in signal_list]
+    try:
+        x = np.arange(0,SAMPLES_PER_PERIOD)
+        duty_cicle = float(args.duty)
+        if args.waveform == 'sine':
+            signal_np = (MULTIPLIER * np.sin(2*np.pi*x/SAMPLES_PER_PERIOD)) + MULTIPLIER
+            signal_list = signal_np.tolist()
+            signal = [round(signal_list) for signal_list in signal_list]
+        elif args.waveform == 'triangular':
+            signal_np = (MULTIPLIER * sg.sawtooth(2*np.pi*x/SAMPLES_PER_PERIOD, width=duty_cicle)) + MULTIPLIER
+            signal_list = signal_np.tolist()
+            signal = [round(signal_list) for signal_list in signal_list]
+        elif args.waveform == 'square':
+            signal_np = (MULTIPLIER * sg.square(2*np.pi*x/SAMPLES_PER_PERIOD, duty=duty_cicle)) + MULTIPLIER
+            signal_list = signal_np.tolist()
+            signal = [round(signal_list) for signal_list in signal_list]
 
-    sonar_client_pc = EspMqttComm(client_name)
-    sonar_client_pc.connect()
-    sonar_client_pc.send_command_to_esp(args.repeat_period, signal)
-    sonar_client_pc.disconnect()
+        sonar_client_pc = EspMqttComm(client_name)
+        sonar_client_pc.connect()
+        sonar_client_pc.send_command_to_esp(args.repeat_period, signal)
+        sonar_client_pc.disconnect()
+    except Exception as e:
+        print('ERROR:', e)
 
     # terminar broker
     broker_process.kill()
