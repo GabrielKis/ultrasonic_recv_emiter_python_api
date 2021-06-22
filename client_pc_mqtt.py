@@ -1,6 +1,10 @@
 import paho.mqtt.client as mqtt 
 from random import randrange, uniform
+import matplotlib.pyplot as plt
+import mplcursors
 import time
+import numpy as np
+import csv
 
 from queue import Queue
 
@@ -16,6 +20,7 @@ class EspMqttComm():
         # send and receive params to esp
         self.q = Queue()
         self.client_pc = mqtt.Client(pc_client_name, transport="websockets")
+        self.sent_data_wf= []
         #client_pc = mqtt.Client("Client_PC")
 
     def connect(self):
@@ -31,7 +36,13 @@ class EspMqttComm():
         self._send_data(payload)
         #receive-waveforms
         self._receive_data()
-        #show_data
+        # create sent_data list
+        #for i in range(0,int(qtd_periods)):
+        #    self.sent_data_wf += waveform_data
+        #    pass
+        #fill_zeros = 10000 - len(self.sent_data_wf)
+        #zeros_list = [0] * fill_zeros
+        #self.sent_data_wf += zeros_list
 
     def _on_message(self, client, userdata, message):
         self.q.put(message)
@@ -54,11 +65,40 @@ class EspMqttComm():
             if not self.q.empty():
                 msg = self.q.get()
                 if msg.topic == topics_sub_list[0][0]:
+                    #self.tx_waveform_array = np.array(msg.payload)
+                    self.tx_waveform_array = list(msg.payload)
                     receive_data_ctrl[0] = True
                 if msg.topic == topics_sub_list[1][0]:
+                    #self.rx_waveform_array = np.array(msg.payload)
+                    self.rx_waveform_array = list(msg.payload)
                     receive_data_ctrl[1] = True
 
         self.client_pc.loop_stop()
+
+    def print_data(self):
+        #print("rx array:", self.rx_waveform_array)
+        #print("tx_array:", self.tx_waveform_array)
+        #print("len rx:", len(self.rx_waveform_array))
+        #print("len tx:", len(self.tx_waveform_array))
+        x_rx = range(0,len(self.rx_waveform_array))
+        #x_tx = range(0,len(self.tx_waveform_array))
+        #print(type(x_rx))
+        #print(type(self.sent_data_wf))
+        #print(self.sent_data_wf)
+        #plt.plot(lookup_table, 'bo')
+        print(type(self.rx_waveform_array))
+        print(type(self.rx_waveform_array[0]))
+        lines = plt.plot(x_rx, self.rx_waveform_array)
+        mplcursors.cursor(lines, multiple=True) # or just mplcursors.cursor()
+        plt.grid()
+        #plt.step(x_rx, self.sent_data_wf)
+        plt.ylabel('some numbers')
+        plt.show()
+        with open('csv_file', 'w') as myfile:
+            #wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+            for i in self.rx_waveform_array:
+                myfile.write(str(i))
+                myfile.write(',\n')
 
 if __name__ == "__main__":
     sonar_client_pc = EspMqttComm(client_name)
