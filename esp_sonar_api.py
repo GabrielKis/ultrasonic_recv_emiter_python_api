@@ -6,7 +6,7 @@ from scipy import signal as sg
 import argparse
 from client_pc_mqtt import EspMqttComm
 
-SAMPLES_PER_PERIOD = 50
+SAMPLES_PER_PERIOD = 25
 MULTIPLIER = 127.5
 client_name = 'Client_PC'
 
@@ -20,7 +20,7 @@ def send_data_to_esp():
                         help="Duty cicle of signal [0-1]")
     args = parser.parse_args()
 
-    # begin broker broker
+    # Inicia broker
     broker_process = subprocess.Popen(['mosquitto', '-c', 'mosquitto.conf'],\
                                         stderr=subprocess.STDOUT)
 
@@ -49,6 +49,9 @@ def send_data_to_esp():
 
     # terminar broker
     broker_process.kill()
+
+    # mostra os dados e salva em arquivo CSV
+    sonar_client_pc.print_data()
 
 if __name__ == "__main__":
     send_data_to_esp()

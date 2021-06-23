@@ -1,7 +1,9 @@
 import paho.mqtt.client as mqtt 
 from random import randrange, uniform
+import matplotlib.pyplot as plt
 import time
 import numpy as np
+import csv
 
 from queue import Queue
 
@@ -32,8 +34,6 @@ class EspMqttComm():
         self._send_data(payload)
         #receive-waveforms
         self._receive_data()
-        #show_data
-        self._print_data()
 
     def _on_message(self, client, userdata, message):
         self.q.put(message)
@@ -56,17 +56,32 @@ class EspMqttComm():
             if not self.q.empty():
                 msg = self.q.get()
                 if msg.topic == topics_sub_list[0][0]:
-                    self.tx_waveform_array = np.array(msg.payload)
+                    #self.tx_waveform_array = np.array(msg.payload)
+                    self.tx_waveform_array = list(msg.payload)
                     receive_data_ctrl[0] = True
                 if msg.topic == topics_sub_list[1][0]:
-                    self.rx_waveform_array = np.array(msg.payload)
+                    #self.rx_waveform_array = np.array(msg.payload)
+                    self.rx_waveform_array = list(msg.payload)
                     receive_data_ctrl[1] = True
 
         self.client_pc.loop_stop()
 
-    def _print_data(self):
+    def print_data(self):
         print("rx array:", self.rx_waveform_array)
         print("tx_array:", self.tx_waveform_array)
+        print("len rx:", len(self.rx_waveform_array))
+        print("len tx:", len(self.tx_waveform_array))
+        x_rx = range(0,len(self.rx_waveform_array))
+        x_tx = range(0,len(self.tx_waveform_array))
+        print(len(x_rx))
+        #plt.plot(lookup_table, 'bo')
+        plt.step(x_rx, self.rx_waveform_array)
+        plt.step(x_tx, self.tx_waveform_array)
+        plt.ylabel('some numbers')
+        plt.show()
+        #with open('csv_file', 'wb') as myfile:
+        #    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        #    wr.writerow(self.rx_waveform_array)
 
 if __name__ == "__main__":
     sonar_client_pc = EspMqttComm(client_name)
