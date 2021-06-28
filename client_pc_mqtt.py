@@ -19,6 +19,7 @@ class EspMqttComm():
         # send and receive params to esp
         self.q = Queue()
         self.client_pc = mqtt.Client(pc_client_name, transport="websockets")
+        self.sent_data_wf= []
         #client_pc = mqtt.Client("Client_PC")
 
     def connect(self):
@@ -34,6 +35,14 @@ class EspMqttComm():
         self._send_data(payload)
         #receive-waveforms
         self._receive_data()
+        # create sent_data list
+        for i in range(0,int(qtd_periods)):
+            self.sent_data_wf += waveform_data
+            pass
+
+        fill_zeros = 10000 - len(self.sent_data_wf)
+        zeros_list = [0] * fill_zeros
+        self.sent_data_wf += zeros_list
 
     def _on_message(self, client, userdata, message):
         self.q.put(message)
@@ -67,16 +76,18 @@ class EspMqttComm():
         self.client_pc.loop_stop()
 
     def print_data(self):
-        print("rx array:", self.rx_waveform_array)
-        print("tx_array:", self.tx_waveform_array)
-        print("len rx:", len(self.rx_waveform_array))
-        print("len tx:", len(self.tx_waveform_array))
+        #print("rx array:", self.rx_waveform_array)
+        #print("tx_array:", self.tx_waveform_array)
+        #print("len rx:", len(self.rx_waveform_array))
+        #print("len tx:", len(self.tx_waveform_array))
         x_rx = range(0,len(self.rx_waveform_array))
-        x_tx = range(0,len(self.tx_waveform_array))
-        print(len(x_rx))
+        #x_tx = range(0,len(self.tx_waveform_array))
+        print(type(x_rx))
+        print(type(self.sent_data_wf))
+        print(self.sent_data_wf)
         #plt.plot(lookup_table, 'bo')
         plt.step(x_rx, self.rx_waveform_array)
-        plt.step(x_tx, self.tx_waveform_array)
+        plt.step(x_rx, self.sent_data_wf)
         plt.ylabel('some numbers')
         plt.show()
         #with open('csv_file', 'wb') as myfile:
