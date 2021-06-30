@@ -1,0 +1,1 @@
+Este diretorio existe apenas para organização dos arquivos CSV gerados
