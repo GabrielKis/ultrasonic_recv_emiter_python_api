@@ -46,6 +46,7 @@ def send_data_to_esp():
         sonar_client_pc.disconnect()
     except Exception as e:
         print('ERROR:', e)
+        return
 
     # terminar broker
     broker_process.kill()
